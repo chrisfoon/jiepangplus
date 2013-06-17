@@ -73,7 +73,7 @@ while (1) {
 	# EFB6EC4CEC5C4C77CB546FE94BC819AC 智学苑
 	# 
 	my $username = 'chrisfoon';
-	my $password = '211314';
+	my $password = '';
 
 
 	#my $pid		 = 'EFB6EC4CEC5C4C77CB546FE94BC819AC';

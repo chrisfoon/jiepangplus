@@ -43,7 +43,7 @@ while (1) {
 		next;
 	}
 	my $jiepang = new class::jiepang({ApiConf=>"$FindBin::Bin/config/api.conf"});
-	$jiepang->login({username=>"chrisfoon",password=>"211314"});
+	$jiepang->login({username=>"chrisfoon",password=>""});
 	my $status = $jiepang->publish({pid=>'2DF32F50E0DB12',msg=>$content});
 
 	if ($status eq 'error') {
