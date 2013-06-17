@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 # *******************************************
-# Copyright (C) 2012 WBPlus
+# Copyright (C) 2012 JiePangPlus
 # All rights reserved.
 #
-# 项目名称 : WB+
+# 项目名称 : JP+
 # 文件名称 : login.cgi
 # 摘    要 : 登录接口
 # 作    者 : ChrisFu
@@ -82,6 +82,9 @@ while (1) {
 
 	my $jiepang = new class::jiepang({ApiConf=>"$FindBin::Bin/config/api.conf"});
 	$jiepang->login({username=>$username,password=>$password});
+	print $content,"\n"
+	print $jiepang->search({Q=>"金远见大楼"});
+	last;
 	my $status = $jiepang->publish({pid=>'2C306029FC0728',msg=>$content});
 
 	if ($status eq 'error') {
@@ -91,4 +94,3 @@ while (1) {
 	last;
 }
 
-#print $jiepang->search({Q=>"唐家岭新城"});
