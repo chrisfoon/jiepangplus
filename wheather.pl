@@ -4,25 +4,13 @@
 # All rights reserved.
 #
 # 项目名称 : JP+
-# 文件名称 : login.cgi
-# 摘    要 : 登录接口
+# 文件名称 : wheather.pl
+# 摘    要 : 发送天气预报
 # 作    者 : ChrisFu
 # 创    建：2012/4/10
 # 版    本：1.0
 # *******************************************
-# 支持两种请求方式:
-#	1. 后台执行:(共2个参数,第奇数个是参数名,第偶数个是参数值。)
-#		perl ./login.cgi user 用户帐号 password 用户密码
-#	2. http请求:
-#		http://boss.sina.com.cn/wbplus/login.cgi?user=用户帐号&password=用户密码
-# 返回结果：
-# 第一行为状态值：0->发送失败;1->发送成功
-# 第二行起为内容：如果状态为0，则第二行起为错误内容。如果状态为1，则返回用户详细内容
-# *******************************************
 use strict;
-use warnings;
-use JSON;
-use LWP::Simple;
 use Encode;
 use FindBin;
 use lib $FindBin::Bin;
@@ -69,23 +57,14 @@ while (1) {
 		sleep 300;
 		next;
 	}
-	
-	# EFB6EC4CEC5C4C77CB546FE94BC819AC 智学苑
-	# 
-	my $username = 'chrisfoon';
-	my $password = '';
 
-
-	#my $pid		 = 'EFB6EC4CEC5C4C77CB546FE94BC819AC';
-	my $pid		 = '2C306029FC0728';# 唐家岭新城
 	my $content  = "$today $city\:$whea $temp $wind;$next_week:$whea2 $temp2 $wind2;$next_b_week:$whea3 $temp3 $wind3";
 
-	my $jiepang = new class::jiepang({ApiConf=>"$FindBin::Bin/config/api.conf"});
-	$jiepang->login({username=>$username,password=>$password});
-	print $content,"\n"
-	print $jiepang->search({Q=>"金远见大楼"});
-	last;
-	my $status = $jiepang->publish({pid=>'2C306029FC0728',msg=>$content});
+	my $jiepang   = new class::jiepang({ApiConf=>"$FindBin::Bin/config/api.conf"});
+	my $user_conf = $jiepang->loadconf("$FindBin::Bin/config/chrisfoon.conf");
+
+	$jiepang->login({username=>"$user_conf->{USER}{name}" ,password=>"$user_conf->{USER}{pwd}"});
+	my $status = $jiepang->publish({pid=>"$user_conf->{PLACE}[0]{pid}",msg=>$content});
 
 	if ($status eq 'error') {
 		print "Publish Error!\n";

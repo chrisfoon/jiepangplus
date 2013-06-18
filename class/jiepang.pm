@@ -1,6 +1,5 @@
 #!/usr/bin/perl
 use strict;
-use warnings;
 use JSON;
 use Digest::MD5 qw(md5 md5_hex md5_base64);
 use LWP;
@@ -10,12 +9,14 @@ use HTTP::Cookies::Netscape;
 
 package class::jiepang;
 
+
 sub new{
 	my $class = shift;
 	my $hs_path = shift;
 
 	my $self = {};
 	$self->{'APICONF'}   = '';
+	$self->{'CONF'}		 = {};
 	$self->{'LOGININFO'} = {};
 	
 	if (exists $hs_path->{'ApiConf'}) {
@@ -41,7 +42,7 @@ sub publish{
 	my $_SID_	  = $self->{'LOGININFO'}{'sid'};
 	my $pub_uri = $self->{'APICONF'}{'API'}{'jp_publish'};
 	   $pub_uri =~ s/{_SID_}/$_SID_/g;
-	
+
 	my @arr_postfields = (
 		'id',$hs_param->{'pid'},
 		'status',"$hs_param->{'msg'}",
@@ -108,12 +109,20 @@ sub login {
 	my $login_uri  = $self->{'APICONF'}{'API'}{'jp_login'};
 	my $sid_uri	   = $self->{'APICONF'}{'API'}{'jp_sid'};
 
-	my $username   = $hs_param->{'username'};
-	my $password   = $hs_param->{'password'};
+	my $username;
+	my $password;
+	if (exists $hs_param->{'use_conf'}) {
+		my $hs_uinfo = $self->loadconf($hs_param->{'use_conf'});
+		$username = $hs_uinfo->{USER}{name};
+		$password = $hs_uinfo->{USER}{pwd};
+	}
+	else{
+		$username = $hs_param->{'username'};
+		$password = $hs_param->{'password'};
+	}
 
 	# 保存cookie文件目录
 	my $cookie_path = $self->{'APICONF'}{'LOCAL'}{'path_cookie'};
-	
 
 	my $cookie_jar  = $cookie_path."/jiepang_cookie_".Digest::MD5::md5_hex("$username$password");
 	
@@ -155,6 +164,30 @@ sub login {
 	
 	$self->{'LOGININFO'} = \%hs_return;
 	return \%hs_return;
+}
+
+# ******************
+# 加载配置文件
+# ******************
+sub loadconf{
+	my $self	  = shift;
+	my $conf_file = shift;
+	
+	my $str;
+	open my $apicfh,"<",$conf_file or die "Cann't OPen:$conf_file\n ";
+	while (<$apicfh>) {
+		next if /^#/;
+		$str .= $_;
+	}
+	close($apicfh);
+	my ($name) = $conf_file =~ /([\w\-\_]+)\.conf$/;
+	eval{  $self->{'CONF'}{$name} = JSON::decode_json($str); };
+	if ($@) {
+		print $@;
+		print "\n";
+		exit;
+	}
+	return $self->{'CONF'}{$name};
 }
 
 1;
